@@ -1,0 +1,208 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "integer"
+    },
+    "name": {
+      "type": "string"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "items_opt": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "attr": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "desc": {
+          "type": "string"
+        },
+        "inst": {
+          "type": "string"
+        },
+        "genres": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "porter": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "image": {
+          "anyOf": [
+            {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "screenshot": {
+                  "type": "string"
+                },
+                "cover": {
+                  "type": "null"
+                },
+                "thumbnail": {
+                  "type": "null"
+                },
+                "video": {
+                  "type": "null"
+                }
+              }
+            }
+          ]
+        },
+        "rtr": {
+          "type": "boolean"
+        },
+        "runtime": {
+          "anyOf": [
+            {
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "reqs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "arch": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "exp": {
+          "type": "boolean"
+        },
+        "inst_md": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "url": {
+          "type": "string"
+        },
+        "desc_md": {
+          "type": "null"
+        }
+      },
+      "required": [
+        "desc",
+        "genres",
+        "image",
+        "inst",
+        "porter",
+        "reqs",
+        "rtr",
+        "runtime",
+        "title"
+      ]
+    },
+    "status": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string"
+        },
+        "md5": {
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        "status": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "md5",
+        "source",
+        "status"
+      ]
+    },
+    "files": {
+      "type": "object",
+      "properties": {
+        "port.json": {
+          "type": "string"
+        },
+        "Carmageddon.sh": {
+          "type": "string"
+        },
+        "carmageddon": {
+          "type": "string"
+        },
+        "Doom 3.sh": {
+          "type": "string"
+        },
+        "doom3/": {
+          "type": "string"
+        },
+        "Jazz2 Resurrection.sh": {
+          "type": "string"
+        },
+        "jazz2": {
+          "type": "string"
+        },
+        "Klorets.sh": {
+          "type": "string"
+        },
+        "klorets": {
+          "type": "string"
+        },
+        "openxcom/": {
+          "type": "string"
+        },
+        "OpenXcomEX.sh": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "required": [
+    "attr",
+    "items",
+    "items_opt",
+    "name",
+    "version"
+  ]
+}
