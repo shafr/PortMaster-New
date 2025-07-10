@@ -14,9 +14,6 @@ def json_schema_from_file(schema_version: int, output_schema_path: str):
                 if filename != "port.json":
                     continue
 
-                if root in "imagestriker":
-                    continue
-
                 try:
                     with open(os.path.join(root, filename)) as f:
                         data = json.load(f)

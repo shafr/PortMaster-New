@@ -2,81 +2,67 @@ import os, json
 from genson import SchemaBuilder
 from jsonschema import validate, ValidationError
 from termcolor import cprint
+import re
 
 json_dir = "ports/"
 
-allowed_genres = [
-                                    "action",
-                                    "adventure",
-                                    "arcade",
-                                    "card",
-                                    "casino/card",
-                                    "fps",
-                                    "platformer",
-                                    "puzzle",
-                                    "racing",
-                                    "rhythm",
-                                    "rpg",
-                                    "simulation",
-                                    "sports",
-                                    "shump",
-                                    "strategy",
-                                    "visual novel",
-                                    "other"
-                                ]
+regex_map = {
+    "itch": r"https://.*\.itch\.io/[^ \n\"']*",
+    "epic": r"https://store\.epicgames\.com/[^ \n\"']*",
+    "steam": r"https://store\.steampowered\.com/app/[^ \n\"']*"
+}
 
-def validate_json_files(schema_version: int, schema_path: str):
+def extract_store_link(store_regex, inst, inst_md):
+    match = re.search(regex_map[store_regex], inst)
+    if not match:
+        match = re.search(regex_map[store_regex], inst_md)
+    return match.group(0) if match else ""
+
+def validate_json_files(path_to_validate, schema_path: str):
     try:
         # Load the schema
         with open(schema_path) as schema_file:
             schema = json.load(schema_file)
 
-        errors_found = False
+        with open(path_to_validate) as f:
+            data = json.load(f)
+            data_as_text = json.dumps(data, indent=2)
 
-        for root, _, files in os.walk(json_dir):
-            for filename in files:
-                if filename != "port.json":
-                    continue
 
-                try:
-                    with open(os.path.join(root, filename)) as f:
-                        data = json.load(f)
+            data["attr"]["min_glibc"] = ""
+            runtime = data["attr"]["runtime"]
+            data["attr"]["runtime"] = [ runtime ]
 
-                        if "version" not in data:
-                            cprint(f"Error: 'version' key not found in {os.path.join(root, filename)}.", "red")
-                            errors_found = True
-                            continue
+            stores = []
+            availability =
 
-                        # if data["version"] != schema_version:
-                        #     # cprint(f"Warning: Version mismatch in {filename}. Expected {schema_version}, found {data['version']}.", "yellow")
-                        #     continue
 
-                        try:
-                            genre_value = data["attr"]["genres"]
-                            if isinstance(genre_value, list):
-                                invalid_genres = [g for g in genre_value if g not in allowed_genres]
-                                if invalid_genres:
-                                    cprint(f"Invalid genre(s) in {os.path.join(root, filename)}: {invalid_genres}", "red")
-                                    errors_found = True
-                            else:
-                                if genre_value not in allowed_genres:
-                                    cprint(f"Invalid genre '{genre_value}' in {os.path.join(root, filename)}", "red")
-                                    errors_found = True
+            if "itch.io" in data["attr"]["inst"] or "itch.io" in data["attr"]["inst_md"]:
+                stores.append( {
+                    "name": "itch.io",
+                    "gameurl": extract_store_link("itch", data["attr"]["inst"], data["attr"]["inst_md"]),
+                } )
 
-                            # validate(instance=data, schema=schema)
-                            # cprint(f"{os.path.join(root, filename)} is valid.", "green")
-                        except ValidationError as ve:
-                            cprint(f"Validation error in {os.path.join(root, filename)}: {ve.message}\n", "red")
-                            errors_found = True
-                except Exception as e:
-                    cprint(f"Error processing {filename} in {root}: {e}", "red")
-                    errors_found = True
-                    continue
+            if "store.epicgames.com"in data["attr"]["inst"] or "store.epicgames.com" in data["attr"]["inst_md"]:
+                stores.append( {
+                    "name": "epic",
+                    "gameurl": extract_store_link("epic", data["attr"]["inst"], data["attr"]["inst_md"]),
+                } )
 
-        if errors_found:
-            print("Some files failed validation.")
-        else:
-            print("All files validated successfully.")
+            if "store.steampowered.com" in data["attr"]["inst"] or "store.steampowered.com" in data["attr"]["inst_md"]:
+                stores.append( {
+                    "name": "steam",
+                    "gameurl": extract_store_link("steam", data["attr"]["inst"], data["attr"]["inst_md"]),
+                } )
+
+            data["attr"]["store"] = stores
+            try:
+                validate(instance=data, schema=schema)
+                cprint(f"Validation successful for {path_to_validate}", "green")
+
+                cprint(json.dumps(data, indent=2), "blue")
+            except ValidationError as ve:
+                cprint(f"Validation error in {path_to_validate}: {ve.message}\n", "red")
     except IOError as e:
         print(f"I/O error occurred: {e}")
     except Exception as e:
@@ -84,6 +70,6 @@ def validate_json_files(schema_version: int, schema_path: str):
 
 if __name__ == "__main__":
     validate_json_files(
-        schema_version=4,
+        path_to_validate="ports/celeste/port.json",
         schema_path="schema/v4_schema.json"
     )
